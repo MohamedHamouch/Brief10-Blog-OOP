@@ -2,21 +2,16 @@
 
 class Authentication
 {
-    private $db;
-
-    public function __construct(PDO $conn)
+    
+    public function register(PDO $db, Blogger $blogger, $password, $confirmPassword)
     {
-        $this->db = $conn;
-    }
-
-    public function register($firstName, $lastName, $email, $password, $confirmPassword, $role = 'user')
-    {
+        $bloggerInfo = $blogger->getAttributes();
 
         try {
 
             $query = "SELECT * FROM user WHERE email = :email";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':email', $email);
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':email', $bloggerInfo['email']);
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
@@ -29,23 +24,23 @@ class Authentication
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
             $query = "INSERT INTO user (first_name, last_name, email, password, role_id) VALUES (:firstName, :lastName, :email, :password, :role)";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':firstName', $firstName);
-            $stmt->bindParam(':lastName', $lastName);
-            $stmt->bindParam(':email', $email);
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':firstName', $bloggerInfo['firstName']);
+            $stmt->bindParam(':lastName', $bloggerInfo['lastName']);
+            $stmt->bindParam(':email', $bloggerInfo['email']);
             $stmt->bindParam(':password', $hashedPassword);
-            $stmt->bindParam(':role', $role);
+            $stmt->bindParam(':role', $bloggerInfo['roleId']);
             $stmt->execute();
 
-            $userId = $this->db->lastInsertId();
+            $userId = $db->lastInsertId();
 
             if ($userId) {
 
                 $_SESSION['userId'] = $userId;
-                $_SESSION['firstName'] = $firstName;
-                $_SESSION['lastName'] = $lastName;
-                $_SESSION['email'] = $email;
-                $_SESSION['role'] = $role;
+                $_SESSION['firstName'] = $bloggerInfo['firstName'];
+                $_SESSION['lastName'] = $bloggerInfo['lastName'];
+                $_SESSION['email'] = $bloggerInfo['email'];
+                $_SESSION['role'] = $bloggerInfo['roleId'];
             }
 
             return true;
@@ -55,12 +50,12 @@ class Authentication
         }
     }
 
-    public function login($email, $password)
+    public function login(PDO $db, $email, $password)
     {
         try {
 
             $query = "SELECT * FROM user WHERE email = :email";
-            $stmt = $this->db->prepare($query);
+            $stmt = $db->prepare($query);
             $stmt->bindParam(":email", $email);
             $stmt->execute();
 
