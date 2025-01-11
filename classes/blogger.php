@@ -4,6 +4,7 @@ require_once 'User.php';
 
 class Blogger extends User
 {
+    protected $id;
     protected $firstName;
     protected $lastName;
     protected $roleId;
@@ -41,21 +42,21 @@ class Blogger extends User
     }
 
     //articles
-    public function addArticle(){
+    public function addArticle(PDO $db, Article $article){
 
     }
 
-    public function deleteArticle(){
+    public function deleteArticle(PDO $db, $articleId){
 
     }
 
-    public function editArticle(){
+    public function editArticle(PDO $db, $articleId){
         
     }
 
     //comments
 
-    public function deleteComment(){
+    public function deleteComment(PDO $dbn, $commentId){
 
     }
     public function editComment(){
