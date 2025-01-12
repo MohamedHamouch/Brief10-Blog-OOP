@@ -62,13 +62,35 @@ class Blogger extends User
 
     public function addComment(PDO $db, Comment $comment)
     {
+        $article_id = $comment->getArticleId();
+        $user_id = $comment->getUserId();
+        $content = $comment->getContent();
+
+        $query = 'INSERT INTO comments (article_id, user_id, content) VALUES (:articleId, :userId, :content)';
+        $stmt = $db->prepare($query);
+
+        $stmt->bindParam(':articleId', $article_id, PDO::PARAM_INT);
+        $stmt->bindParam(':userID', $user_id, PDO::PARAM_INT);
+        $stmt->bindParam(':content', $content, PDO::PARAM_STR);
+
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
     public function deleteComment(PDO $db, $commentId)
     {
-
+        $stmt = $db->prepare("DELETE FROM comment WHERE comment_id = ?");
+        if ($stmt->execute([$commentId])) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
     public function editComment()
     {
 

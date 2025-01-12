@@ -27,14 +27,52 @@ class User implements Authentication
         return $articles;
     }
 
-    public function getArticle(PDO $db, $articleId){
-        $query = "SELECT * FROM article WHERE id= :articleId";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':artucleId', $articleId);
-        $stmt->execute();
+    public function getArticleDetails(PDO $db, $articleId) {
+        $found = false;
+        $article = null;
+        $publisher = null;
+        $tags = [];
+        $comments = [];
+    
+        $stmt = $db->prepare("SELECT * FROM articles WHERE id = ?");
+        $stmt->execute([$articleId]);
+    
         $article = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $article;
+    
+        if ($article) {
+            $found = true;
+    
+            $stmtPublisher = $db->prepare("SELECT * FROM users WHERE id = ?");
+            $stmtPublisher->execute([$article['user_id']]);
+            $publisher = $stmtPublisher->fetch(PDO::FETCH_ASSOC);
+    
+            $stmtTags = $db->prepare("
+                SELECT tags.name FROM tags
+                JOIN article_tag ON tags.id = article_tag.tag_id
+                WHERE article_tag.article_id = ?
+            ");
+            $stmtTags->execute([$articleId]);
+            $tags = $stmtTags->fetchAll(PDO::FETCH_ASSOC);
+    
+            $stmtComments = $db->prepare("
+                SELECT users.name, comments.content, comments.created_at 
+                FROM users
+                JOIN comments ON users.id = comments.user_id
+                WHERE comments.article_id = ?
+            ");
+            $stmtComments->execute([$articleId]);
+            $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
+        }
+    
+        return [
+            'found' => $found,
+            'article' => $article,
+            'publisher' => $publisher,
+            'tags' => $tags,
+            'comments' => $comments
+        ];
     }
+    
 
     public function register(PDO $db, $firstName, $lastName, $password, $confirmPassword, $role = 3)
     {
