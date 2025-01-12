@@ -36,10 +36,6 @@ class User implements Authentication
         return $article;
     }
 
-    public function addComment(PDO $db, Comment $comment){
-        
-    }
-
     public function register(PDO $db, $firstName, $lastName, $password, $confirmPassword, $role = 3)
     {
 

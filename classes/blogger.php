@@ -20,6 +20,7 @@ class Blogger extends User
     public function getAttributes()
     {
         return [
+            'id' => $this->id,
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
             'email' => $this->email,
@@ -42,32 +43,45 @@ class Blogger extends User
     }
 
     //articles
-    public function addArticle(PDO $db, Article $article){
+    public function addArticle(PDO $db, Article $article)
+    {
 
     }
 
-    public function deleteArticle(PDO $db, $articleId){
+    public function deleteArticle(PDO $db, $articleId)
+    {
 
     }
 
-    public function editArticle(PDO $db, $articleId){
-        
+    public function editArticle(PDO $db, $articleId)
+    {
+
     }
 
     //comments
 
-    public function deleteComment(PDO $dbn, $commentId){
+    public function addComment(PDO $db, Comment $comment)
+    {
 
     }
-    public function editComment(){
+
+    public function deleteComment(PDO $db, $commentId)
+    {
+
+    }
+    public function editComment()
+    {
 
     }
 
     //profile
 
-    public function editProfile(){
-        
+    public function editProfile()
+    {
+
     }
+
+
 }
 
 ?>
