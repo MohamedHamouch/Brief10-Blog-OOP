@@ -20,7 +20,7 @@ if (isset($_SESSION['role'])) {
 }
 
 
-?>;
+?>
 
 <!DOCTYPE html>
 <html lang="en">

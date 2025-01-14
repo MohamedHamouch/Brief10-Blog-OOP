@@ -16,7 +16,7 @@ class Blogger extends User
         $this->lastName = $lastName;
     }
 
-    public function loadInfoByEmail($db)
+    public function loadInfoByEmail(PDO $db)
     {
         $query = "SELECT * FROM users WHERE email = :email";
         $stmt = $db->prepare($query);
@@ -31,14 +31,13 @@ class Blogger extends User
         $this->roleId = $user['role_id'];
     }
 
-    public function loadInfoById($db)
+    public function loadInfoById(PDO $db)
     {
         $query = "SELECT * FROM users WHERE id = :id";
         $stmt = $db->prepare($query);
         $stmt->bindParam(":id", $this->id);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
 
         $this->email = $user['email'];
         $this->firstName = $user['first_name'];
@@ -51,10 +50,20 @@ class Blogger extends User
         return $this->roleId;
     }
 
-    public function __tostring(){
+    public function __tostring()
+    {
         return "$this->firstName $this->lastName";
     }
 
+    public function getFirstName()
+    {
+        return $this->firstName;
+    }
+
+    public function getLastName()
+    {
+        return $this->firstName;
+    }
     public function getAttributes()
     {
         return [
@@ -97,6 +106,15 @@ class Blogger extends User
 
     }
 
+    public function getUserArticles(PDO $db)
+    {
+        $query = "SELECT * FROM articles 
+        WHERE user_id = $this->id";
+        $stmt = $db->prepare($query);
+        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $articles;
+    }
+
     //comments
 
     public function addComment(PDO $db, Comment $comment)
@@ -133,6 +151,28 @@ class Blogger extends User
     public function editComment()
     {
 
+    }
+
+    public function getUserComments(PDO $db)
+    {
+        $query = "SELECT title, comment_date 
+                FROM comments
+                JOIN articles ON articles.id = comments.article_id
+                WHERE comments.user_id = $this->id";
+
+        $stmt = $db->query($query);
+        $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $comments;
+    }
+
+    //tags
+
+    public function getAllTags(PDO $db)
+    {
+        $query = "SELECT * FROM tags";
+        $stmt = $db->query($query);
+        $tags = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $tags;
     }
 
     //profile

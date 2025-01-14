@@ -31,7 +31,7 @@ class User implements Authentication
     public function getLatestArticles($db)
     {
         $query = "SELECT * FROM articles
-        ORDER BY published_at DESC
+        ORDER BY publishedt DESC
         LIMIT 4";
         $stmt = $db->query($query);
         $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);

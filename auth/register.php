@@ -93,11 +93,11 @@ if (isset($_SESSION['email'])) {
               </p>
             </div>
 
-            <?php if (isset($_SESSION['register_error'])) { ?>
+            <?php if (isset($_SESSION['registerError'])) { ?>
               <div class="bg-red-50 text-red-500 text-sm p-4 rounded-lg mb-6">
-                <?= $_SESSION['register_error'] ?>
+                <?= $_SESSION['registerError'] ?>
               </div>
-              <?php unset($_SESSION['register_error']); ?>
+              <?php unset($_SESSION['registerError']); ?>
             <?php } ?>
 
             <form action="handel_auth/register_process.php" method="POST">
