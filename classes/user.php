@@ -1,4 +1,5 @@
 <?php
+require_once 'authentication.php';
 
 class User implements Authentication
 {
@@ -21,31 +22,42 @@ class User implements Authentication
 
     public function getAllArticles(PDO $db)
     {
-        $query = "SELECT * FROM article";
+        $query = "SELECT * FROM articles";
         $stmt = $db->query($query);
         $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $articles;
     }
 
-    public function getArticleDetails(PDO $db, $articleId) {
+    public function getLatestArticles($db)
+    {
+        $query = "SELECT * FROM articles
+        ORDER BY published_at DESC
+        LIMIT 4";
+        $stmt = $db->query($query);
+        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $articles;
+    }
+
+    public function getArticleDetails(PDO $db, $articleId)
+    {
         $found = false;
         $article = null;
         $publisher = null;
         $tags = [];
         $comments = [];
-    
+
         $stmt = $db->prepare("SELECT * FROM articles WHERE id = ?");
         $stmt->execute([$articleId]);
-    
+
         $article = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
         if ($article) {
             $found = true;
-    
+
             $stmtPublisher = $db->prepare("SELECT * FROM users WHERE id = ?");
             $stmtPublisher->execute([$article['user_id']]);
             $publisher = $stmtPublisher->fetch(PDO::FETCH_ASSOC);
-    
+
             $stmtTags = $db->prepare("
                 SELECT tags.name FROM tags
                 JOIN article_tag ON tags.id = article_tag.tag_id
@@ -53,7 +65,7 @@ class User implements Authentication
             ");
             $stmtTags->execute([$articleId]);
             $tags = $stmtTags->fetchAll(PDO::FETCH_ASSOC);
-    
+
             $stmtComments = $db->prepare("
                 SELECT users.name, comments.content, comments.created_at 
                 FROM users
@@ -63,7 +75,7 @@ class User implements Authentication
             $stmtComments->execute([$articleId]);
             $comments = $stmtComments->fetchAll(PDO::FETCH_ASSOC);
         }
-    
+
         return [
             'found' => $found,
             'article' => $article,
@@ -72,14 +84,13 @@ class User implements Authentication
             'comments' => $comments
         ];
     }
-    
 
     public function register(PDO $db, $firstName, $lastName, $password, $confirmPassword, $role = 3)
     {
 
         try {
 
-            $query = "SELECT * FROM user WHERE email = :email";
+            $query = "SELECT * FROM users WHERE email = :email";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':email', $this->email);
             $stmt->execute();
@@ -93,7 +104,7 @@ class User implements Authentication
 
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $query = "INSERT INTO user (firstName, lastName, email, password, role) VALUES (:firstName, :lastName, :email, :password, :role)";
+            $query = "INSERT INTO users (firstName, lastName, email, password, role) VALUES (:firstName, :lastName, :email, :password, :role)";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':firstName', $firstName);
             $stmt->bindParam(':lastName', $lastName);
@@ -124,9 +135,9 @@ class User implements Authentication
     {
         try {
 
-            $query = "SELECT * FROM user WHERE email = :email";
+            $query = "SELECT * FROM users WHERE email = :email";
             $stmt = $db->prepare($query);
-            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":email", $this->email);
             $stmt->execute();
 
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -148,20 +159,18 @@ class User implements Authentication
         }
     }
 
-
     public function logout()
     {
         session_unset();
         session_destroy();
         return true;
     }
-
-    public function isLoggedIn()
+    public function isAdmin()
     {
-        return isset($_SESSION['userId']);
+        return isset($_SESSION['role']) && ($_SESSION['role'] === 1 || $_SESSION['role'] === 2);
     }
 
-    public function isAdmin()
+    public function isSuperAdmin()
     {
         return isset($_SESSION['role']) && $_SESSION['role'] === 1;
     }

@@ -1,5 +1,4 @@
 <?php
-
 require_once 'User.php';
 
 class Blogger extends User
@@ -7,14 +6,53 @@ class Blogger extends User
     protected $id;
     protected $firstName;
     protected $lastName;
-    protected $roleId;
+    protected $roleId = 3;
 
-    public function __construct($firstName, $lastName, $email)
+    public function __construct($id, $firstName, $lastName, $email)
     {
         parent::__construct($email);
+        $this->id = $id;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
-        $this->roleId = 3;
+    }
+
+    public function loadInfoByEmail($db)
+    {
+        $query = "SELECT * FROM users WHERE email = :email";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+        $this->id = $user['id'];
+        $this->firstName = $user['first_name'];
+        $this->lastName = $user['last_name'];
+        $this->roleId = $user['role_id'];
+    }
+
+    public function loadInfoById($db)
+    {
+        $query = "SELECT * FROM users WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(":id", $this->id);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+        $this->email = $user['email'];
+        $this->firstName = $user['first_name'];
+        $this->lastName = $user['last_name'];
+        $this->roleId = $user['role_id'];
+    }
+
+    public function getRole()
+    {
+        return $this->roleId;
+    }
+
+    public function __tostring(){
+        return "$this->firstName $this->lastName";
     }
 
     public function getAttributes()
@@ -27,6 +65,7 @@ class Blogger extends User
             'roleId' => $this->roleId,
         ];
     }
+
     public function setFirstName($firstName)
     {
         $this->firstName = $firstName;

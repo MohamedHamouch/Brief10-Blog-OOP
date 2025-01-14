@@ -9,7 +9,7 @@ interface Authentication
    
     public function logout();
 
-    public function isLoggedIn();
-
     public function isAdmin();
+
+    public function isSuperAdmin();
 }
