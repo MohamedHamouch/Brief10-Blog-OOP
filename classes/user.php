@@ -31,7 +31,7 @@ class User implements Authentication
     public function getLatestArticles($db)
     {
         $query = "SELECT * FROM articles
-        ORDER BY publishedt DESC
+        ORDER BY published_at DESC
         LIMIT 4";
         $stmt = $db->query($query);
         $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -104,7 +104,7 @@ class User implements Authentication
 
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $query = "INSERT INTO users (firstName, lastName, email, password, role) VALUES (:firstName, :lastName, :email, :password, :role)";
+            $query = "INSERT INTO users (first_name, last_name, email, password, role_Id) VALUES (:firstName, :lastName, :email, :password, :role)";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':firstName', $firstName);
             $stmt->bindParam(':lastName', $lastName);
@@ -121,7 +121,7 @@ class User implements Authentication
                 $_SESSION['firstName'] = $firstName;
                 $_SESSION['lastName'] = $lastName;
                 $_SESSION['email'] = $this->email;
-                $_SESSION['role'] = $role;
+                $_SESSION['role'] = (int) $role;
             }
 
             return true;
@@ -150,7 +150,7 @@ class User implements Authentication
             $_SESSION['firstName'] = $user['first_name'];
             $_SESSION['lastName'] = $user['last_name'];
             $_SESSION['email'] = $user['email'];
-            $_SESSION['role'] = $user['role_id'];
+            $_SESSION['role'] = (int) $user['role_id'];
 
             return true;
 

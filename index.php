@@ -8,9 +8,9 @@ require_once 'classes/blogger.php';
 if (isset($_SESSION['role'])) {
   if ($_SESSION['role'] === 3) {
 
-    $user = new Blogger($_SESSION['userId'], $_SESSION['firstName'], $_SESSION['lastName'], $_SESSION['emal']);
+    $user = new Blogger($_SESSION['userId'], $_SESSION['firstName'], $_SESSION['lastName'], $_SESSION['email']);
   } else {
-    $user = new Admin($_SESSION['userId'], $_SESSION['firstName'], $_SESSION['lastName'], $_SESSION['emal']);
+    $user = new Admin($_SESSION['userId'], $_SESSION['firstName'], $_SESSION['lastName'], $_SESSION['email']);
   }
 
   $connected = true;

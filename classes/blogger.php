@@ -93,8 +93,56 @@ class Blogger extends User
     //articles
     public function addArticle(PDO $db, Article $article)
     {
+        $title = $article->getTitle();
+        $content = $article->getContent();
+        $description = $article->getDescription();
+        $image = $article->getImage();
+        $user_id = $article->getUserId();
+        $tags = $article->getTags();
 
+        if ($image['size'] > 5 * 1024 * 1024) {
+            return false;
+        }
+
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($image['type'], $allowed_types)) {
+            return false;
+        }
+
+        $imageTmpName = $image['tmp_name'];
+        $imageExtension = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+        $imageName = uniqid('image_') . ".$imageExtension";
+        $imageDestination = "../../uploads/$imageName";
+
+        if (!move_uploaded_file($imageTmpName, $imageDestination)) {
+            return false;
+        }
+
+        $query = "INSERT INTO articles (user_id, title, description, content, image) VALUES (:user_id, :title, :description, :content, :image)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+        $stmt->bindParam(':description', $description, PDO::PARAM_STR);
+        $stmt->bindParam(':content', $content, PDO::PARAM_STR);
+        $stmt->bindParam(':image', $imageName, PDO::PARAM_STR);
+
+        if ($stmt->execute()) {
+
+            $article_id = $db->lastInsertId();
+            if (!empty($tags)) {
+                $stmt = $db->prepare("INSERT INTO article_tags (article_id, tag_id) VALUES (:article_id, :tag_id)");
+                foreach ($tags as $tag_id) {
+                    $stmt->bindParam(':article_id', $article_id, PDO::PARAM_INT);
+                    $stmt->bindParam(':tag_id', $tag_id, PDO::PARAM_INT);
+                    $stmt->execute();
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
     public function deleteArticle(PDO $db, $articleId)
     {
@@ -155,8 +203,7 @@ class Blogger extends User
 
     public function getUserComments(PDO $db)
     {
-        $query = "SELECT title, comment_date 
-                FROM comments
+        $query = "SELECT * FROM comments
                 JOIN articles ON articles.id = comments.article_id
                 WHERE comments.user_id = $this->id";
 
