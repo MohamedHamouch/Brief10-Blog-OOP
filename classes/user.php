@@ -58,16 +58,15 @@ class User implements Authentication
             $stmtPublisher->execute([$article['user_id']]);
             $publisher = $stmtPublisher->fetch(PDO::FETCH_ASSOC);
 
-            $stmtTags = $db->prepare("
-                SELECT tags.name FROM tags
-                JOIN article_tag ON tags.id = article_tag.tag_id
-                WHERE article_tag.article_id = ?
+            $stmtTags = $db->prepare("SELECT tags.name
+                FROM tags
+                JOIN article_tags ON tags.id = article_tags.tag_id
+                WHERE article_tags.article_id = ?
             ");
             $stmtTags->execute([$articleId]);
             $tags = $stmtTags->fetchAll(PDO::FETCH_ASSOC);
 
-            $stmtComments = $db->prepare("
-                SELECT users.name, comments.content, comments.created_at 
+            $stmtComments = $db->prepare("SELECT *
                 FROM users
                 JOIN comments ON users.id = comments.user_id
                 WHERE comments.article_id = ?

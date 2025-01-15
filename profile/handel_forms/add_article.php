@@ -13,14 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $tags = $_POST['tags'];
   $image = $_FILES['image'];
 
-  $article = new Article(null, $_SESSION['userId'], $title, $description, $content, $image, $tags);
+  $article = new Article(null, $_SESSION['userId'], $title, $content, $description, $image, $tags);
   $user = new Blogger($_SESSION['userId'], $_SESSION['firstName'], $_SESSION['lastName'], $_SESSION['email']);
   $user->addArticle($conn, $article);
 
   header("Location: ../profile.php");
 
 } else {
-  
+
   header("Location: ../../index.php");
   exit();
 }
